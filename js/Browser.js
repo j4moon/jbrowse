@@ -13,8 +13,11 @@
  * <li><code>location</code> - (optional) string describing the initial location</li>
  * <li><code>defaultTracks</code> - (optional) comma-delimited string containing initial list of tracks to view if there are no cookies and no "tracks" parameter</li>
  * <li><code>defaultLocation</code> - (optional) string describing the initial location if there are no cookies and no "location" parameter</li>
+ * <li><code>show_nav</code> - (optional) string describing the on/off state of navigation box</li>
+ * <li><code>show_tracklist</code> - (optional) string describing the on/off state of track bar</li>
  * </ul>
  */
+
 
 var Browser = function(params) {
     dojo.require("dojo.dnd.Source");
@@ -47,16 +50,15 @@ var Browser = function(params) {
             brwsr.container.genomeBrowser = brwsr;
             var topPane = document.createElement("div");
             brwsr.container.appendChild(topPane);
-
             var overview = document.createElement("div");
             overview.className = "overview";
             overview.id = "overview";
+	    // controls blue shading in red box
             topPane.appendChild(overview);
             //try to come up with a good estimate of how big the location box
             //actually has to be
             var maxBase = refSeqs.reduce(function(a,b) {return a.end > b.end ? a : b;}).end;
             var navbox = brwsr.createNavBox(topPane, (2 * (String(maxBase).length + (((String(maxBase).length / 3) | 0) / 2))) + 2, params);
-
             var viewElem = document.createElement("div");
             brwsr.container.appendChild(viewElem);
             viewElem.className = "dragWindow";
@@ -158,12 +160,15 @@ var Browser = function(params) {
 	    for (var i = 0; i < brwsr.deferredFunctions.length; i++)
 		brwsr.deferredFunctions[i]();
 	    brwsr.deferredFunctions = [];
+
         });
 };
 
 /**
  * @private
  */
+
+
 Browser.prototype.onFineMove = function(startbp, endbp) {
     var length = this.view.ref.end - this.view.ref.start;
     var trapLeft = Math.round((((startbp - this.view.ref.start) / length)
@@ -196,10 +201,23 @@ Browser.prototype.onFineMove = function(startbp, endbp) {
 /**
  * @private
  */
+
+
 Browser.prototype.createTrackList = function(parent, params) {
     var leftPane = document.createElement("div");
-    leftPane.style.cssText="width: 10em";
+
+
+    // controls the width of leftPane
+    if( params.show_tracklist != 0 ) {   
+    	leftPane.style.cssText="width: 10em";
+    } else {
+    	leftPane.style.cssText="width: 0em";	
+    };
+
+
+//controls track
     parent.appendChild(leftPane);
+//splitter on left side
     var leftWidget = new dijit.layout.ContentPane({region: "left", splitter: true}, leftPane);
     var trackListDiv = document.createElement("div");
     trackListDiv.id = "tracksAvail";
@@ -215,7 +233,7 @@ Browser.prototype.createTrackList = function(parent, params) {
     var brwsr = this;
 
     var changeCallback = function() {
-        brwsr.view.showVisibleBlocks(true);
+       brwsr.view.showVisibleBlocks(true);
     };
 
     var trackListCreate = function(track, hint) {
@@ -235,7 +253,7 @@ Browser.prototype.createTrackList = function(parent, params) {
     };
     this.trackListWidget = new dojo.dnd.Source(trackListDiv,
                                                {creator: trackListCreate,
-						accept: ["track"],
+						accept: ["track"], // accepts tracks into left div
 						withHandles: false});
 
     var trackCreate = function(track, hint) {
@@ -258,12 +276,15 @@ Browser.prototype.createTrackList = function(parent, params) {
         }
         return {node: node, data: track, type: ["track"]};
     };
+    
+
+
     this.viewDndWidget = new dojo.dnd.Source(this.view.zoomContainer,
-                                       {
-                                           creator: trackCreate,
-                                           accept: ["track"],
-                                           withHandles: true
-                                       });
+    	                               {
+    	                                   creator: trackCreate,
+    	                                   accept: ["track"], //accepts tracks into the viewing field
+    	                                   withHandles: true
+    	                               });
     dojo.subscribe("/dnd/drop", function(source,nodes,iscopy){
                        brwsr.onVisibleTracksChanged();
                        //multi-select too confusing?
@@ -286,6 +307,8 @@ Browser.prototype.createTrackList = function(parent, params) {
 /**
  * @private
  */
+
+
 Browser.prototype.onVisibleTracksChanged = function() {
     this.view.updateTrackList();
     var trackLabels = dojo.map(this.view.tracks,
@@ -332,6 +355,7 @@ Browser.prototype.addTracks = function(trackList, replace) {
  * &lt;center base&gt;<br>
  * &lt;feature name/ID&gt;
  */
+
 Browser.prototype.navigateTo = function(loc) {
     if (!this.isInitialized) {
         var brwsr = this;
@@ -438,6 +462,7 @@ Browser.prototype.navigateTo = function(loc) {
  * each of which should correspond to the "label" element of the track
  * information dictionaries
  */
+
 Browser.prototype.showTracks = function(trackNameList) {
     if (!this.isInitialized) {
         var brwsr = this;
@@ -455,7 +480,8 @@ Browser.prototype.showTracks = function(trackNameList) {
                 if (trackNames[n] == obj.data.label) {
                     brwsr.viewDndWidget.insertNodes(false, [obj.data]);
                     removeFromList.push(id);
-                }
+                }x
+
             });
     }
     var movedNode;
@@ -471,7 +497,9 @@ Browser.prototype.showTracks = function(trackNameList) {
  * @returns {String} string representation of the current location<br>
  * (suitable for passing to navigateTo)
  */
+
 Browser.prototype.visibleRegion = function() {
+    //document.write(this);
     return this.view.ref.name + ":" + Math.round(this.view.minVisible()) + ".." + Math.round(this.view.maxVisible());
 };
 
@@ -479,15 +507,19 @@ Browser.prototype.visibleRegion = function() {
  * @returns {String} containing comma-separated list of currently-viewed tracks<br>
  * (suitable for passing to showTracks)
  */
+
 Browser.prototype.visibleTracks = function() {
     var trackLabels = dojo.map(this.view.tracks,
                                function(track) { return track.name; });
     return trackLabels.join(",");
 };
 
+
+
 /**
  * @private
  */
+
 Browser.prototype.onCoarseMove = function(startbp, endbp) {
     var length = this.view.ref.end - this.view.ref.start;
     var trapLeft = Math.round((((startbp - this.view.ref.start) / length)
@@ -521,17 +553,22 @@ Browser.prototype.onCoarseMove = function(startbp, endbp) {
 /**
  * @private
  */
+
 Browser.prototype.createNavBox = function(parent, locLength, params) {
     var brwsr = this;
     var navbox = document.createElement("div");
     var browserRoot = params.browserRoot ? params.browserRoot : "";
     navbox.id = "navbox";
-    parent.appendChild(navbox);
-    navbox.style.cssText = "text-align: center; padding: 2px; z-index: 10;";
+    //top pane nav box on/off
+    if( params.show_nav != 0 ) {
+        parent.appendChild(navbox);
+    };
+    navbox.style.cssText = "text-align: center; padding: 2px; z-index: 10; ";
 
     if (params.bookmark) {
         this.link = document.createElement("a");
         this.link.appendChild(document.createTextNode("Link"));
+
         this.link.href = window.location.href;
         dojo.connect(this, "onCoarseMove", function() {
                          brwsr.link.href = params.bookmark(brwsr);
@@ -543,17 +580,23 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
         navbox.appendChild(this.link);
     }
 
+    //var imgLink = document.createElement("a");
+    
+    //this.link.appendChild(document.createTextNode("DW"));
+
     var moveLeft = document.createElement("input");
     moveLeft.type = "image";
     moveLeft.src = browserRoot + "img/slide-left.png";
     moveLeft.id = "moveLeft";
     moveLeft.className = "icon nav";
     moveLeft.style.height = "40px";
-    dojo.connect(moveLeft, "click",
-                 function(event) {
-                     dojo.stopEvent(event);
-                     brwsr.view.slide(0.9);
-                 });
+    if( params.show_nav != 0 ) {
+	dojo.connect(moveLeft, "click",
+		function(event) {
+		dojo.stopEvent(event);
+		brwsr.view.slide(0.9);
+        })
+    };
     navbox.appendChild(moveLeft);
 
     var moveRight = document.createElement("input");
@@ -562,11 +605,12 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
     moveRight.id="moveRight";
     moveRight.className = "icon nav";
     moveRight.style.height = "40px";
-    dojo.connect(moveRight, "click",
-                 function(event) {
+    if( params.show_nav != 0 ) {
+    	dojo.connect(moveRight, "click",
+                     function(event) {
                      dojo.stopEvent(event);
                      brwsr.view.slide(-0.9);
-                 });
+                 })};
     navbox.appendChild(moveRight);
 
     navbox.appendChild(document.createTextNode("\u00a0\u00a0\u00a0\u00a0"));
@@ -578,11 +622,12 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
     bigZoomOut.className = "icon nav";
     bigZoomOut.style.height = "40px";
     navbox.appendChild(bigZoomOut);
-    dojo.connect(bigZoomOut, "click",
+    if( params.show_nav != 0 ) {   
+	dojo.connect(bigZoomOut, "click",
                  function(event) {
                      dojo.stopEvent(event);
                      brwsr.view.zoomOut(undefined, undefined, 2);
-                 });
+                 })};
 
     var zoomOut = document.createElement("input");
     zoomOut.type = "image";
@@ -590,11 +635,12 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
     zoomOut.id = "zoomOut";
     zoomOut.className = "icon nav";
     zoomOut.style.height = "40px";
-    dojo.connect(zoomOut, "click",
+    if( params.show_nav != 0 ) {   
+	dojo.connect(zoomOut, "click",
                  function(event) {
                      dojo.stopEvent(event);
                      brwsr.view.zoomOut();
-                 });
+                 })};
     navbox.appendChild(zoomOut);
 
     var zoomIn = document.createElement("input");
@@ -603,11 +649,12 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
     zoomIn.id = "zoomIn";
     zoomIn.className = "icon nav";
     zoomIn.style.height = "40px";
-    dojo.connect(zoomIn, "click",
+    if( params.show_nav != 0 ) {
+    	dojo.connect(zoomIn, "click",
                  function(event) {
                      dojo.stopEvent(event);
                      brwsr.view.zoomIn();
-                 });
+                 })};
     navbox.appendChild(zoomIn);
 
     var bigZoomIn = document.createElement("input");
@@ -616,11 +663,12 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
     bigZoomIn.id = "bigZoomIn";
     bigZoomIn.className = "icon nav";
     bigZoomIn.style.height = "40px";
-    dojo.connect(bigZoomIn, "click",
+    if( params.show_nav != 0 ) {  
+	dojo.connect(bigZoomIn, "click",
                  function(event) {
                      dojo.stopEvent(event);
                      brwsr.view.zoomIn(undefined, undefined, 2);
-                 });
+                 })};
     navbox.appendChild(bigZoomIn);
 
     navbox.appendChild(document.createTextNode("\u00a0\u00a0\u00a0\u00a0"));
@@ -631,7 +679,8 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
     this.locationBox.size=locLength;
     this.locationBox.type="text";
     this.locationBox.id="location";
-    dojo.connect(this.locationBox, "keydown", function(event) {
+    if( params.show_nav != 0 ) { 
+	dojo.connect(this.locationBox, "keydown", function(event) {
             if (event.keyCode == dojo.keys.ENTER) {
                 brwsr.navigateTo(brwsr.locationBox.value);
                 //brwsr.locationBox.blur();
@@ -640,18 +689,19 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
             } else {
                 brwsr.goButton.disabled = false;
             }
-        });
+        })};
     navbox.appendChild(this.locationBox);
 
     this.goButton = document.createElement("button");
     this.goButton.appendChild(document.createTextNode("Go"));
     this.goButton.disabled = true;
-    dojo.connect(this.goButton, "click", function(event) {
+    if( params.show_nav != 0 ) {   
+	dojo.connect(this.goButton, "click", function(event) {
             brwsr.navigateTo(brwsr.locationBox.value);
             //brwsr.locationBox.blur();
             brwsr.goButton.disabled = true;
             dojo.stopEvent(event);
-        });
+        })};
     navbox.appendChild(this.goButton);
 
     return navbox;

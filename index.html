@@ -45,6 +45,9 @@
                       + window.location.pathname
                       + "?loc=" + brwsr.visibleRegion()
                       + "&tracks=" + brwsr.visibleTracks();
+		      //+ "&nav=" + brwsr.switchNav();
+		      //+ "&rend=" + brwsr.switchRend()
+		      //+ "&iframe=" + brwsr.openIframe()
            }
            var b = new Browser({
                                    containerID: "GenomeBrowser",
@@ -54,7 +57,9 @@
                                    location: queryParams.loc,
                                    tracks: queryParams.tracks,
                                    bookmark: bookmarkCallback,
-                                   dataRoot: "data/"
+                                   dataRoot: "data/",
+				   show_nav: queryParams.nav,
+				   show_tracklist: queryParams.tracklist
                                });
     /* ]]> */
     </script>
