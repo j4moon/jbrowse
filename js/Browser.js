@@ -18,7 +18,6 @@
  * </ul>
  */
 
-
 var Browser = function(params) {
     dojo.require("dojo.dnd.Source");
     dojo.require("dojo.dnd.Moveable");
