@@ -15,8 +15,10 @@
  * <li><code>defaultLocation</code> - (optional) string describing the initial location if there are no cookies and no "location" parameter</li>
  * <li><code>show_nav</code> - (optional) string describing the on/off state of navigation box</li>
  * <li><code>show_tracklist</code> - (optional) string describing the on/off state of track bar</li>
+ * <li><code>show_overview</code> - (optional) string describing the on/off state of overview</li>
  * </ul>
  */
+
 
 var Browser = function(params) {
     dojo.require("dojo.dnd.Source");
@@ -48,12 +50,51 @@ var Browser = function(params) {
             brwsr.container = dojo.byId(params.containerID);
             brwsr.container.genomeBrowser = brwsr;
             var topPane = document.createElement("div");
-            brwsr.container.appendChild(topPane);
+	    brwsr.container.appendChild(topPane);
             var overview = document.createElement("div");
             overview.className = "overview";
             overview.id = "overview";
+
 	    // controls blue shading in red box
             topPane.appendChild(overview);
+
+	    // overview=0 hides overview 
+	    if( params.show_overview == 0 ) {   
+            	overview.style.cssText="display: none";
+	    };
+	   
+	    // building fullview link
+	    //width: 100px; height: 15px; position:fixed z-index: 10;
+	    var fullview_div = document.createElement("div");
+	    fullview_div.className = "fullview";
+	    fullview_div.id = "fullview";
+	    fullview_div.style.cssText="padding: 2px; height: 15px;";
+	    
+	    if( params.show_nav == 0 ) {
+		topPane.appendChild(fullview_div);
+	    };
+
+	    var fullview = document.createElement("a");
+	    fullview.appendChild(document.createTextNode("Fullview"));
+	    fullview.href = window.location.pathname;
+	    fullview.style.cssText = "padding: 0px; float: right; clear";
+	    fullview_div.appendChild(fullview);
+
+	    if (params.bookmark) {
+		this.link = document.createElement("a");
+		this.link.appendChild(document.createTextNode("Link"));
+
+		this.link.href = window.location.href;
+		dojo.connect(this, "onCoarseMove", function() {
+		                 brwsr.link.href = params.bookmark(brwsr);
+		             });
+		dojo.connect(this, "onVisibleTracksChanged", function() {
+		                 brwsr.link.href = params.bookmark(brwsr);
+		             });
+		this.link.style.cssText = "float: right; clear; margin-right: 10px";
+		fullview_div.appendChild(this.link);
+	    }
+
             //try to come up with a good estimate of how big the location box
             //actually has to be
             var maxBase = refSeqs.reduce(function(a,b) {return a.end > b.end ? a : b;}).end;
@@ -556,14 +597,21 @@ Browser.prototype.onCoarseMove = function(startbp, endbp) {
 Browser.prototype.createNavBox = function(parent, locLength, params) {
     var brwsr = this;
     var navbox = document.createElement("div");
+
     var browserRoot = params.browserRoot ? params.browserRoot : "";
     navbox.id = "navbox";
     //top pane nav box on/off
     if( params.show_nav != 0 ) {
         parent.appendChild(navbox);
     };
-    navbox.style.cssText = "text-align: center; padding: 2px; z-index: 10; ";
+    navbox.style.cssText = "text-align: center; padding: 2px; z-index: 10;";
 
+    var fullview = document.createElement("a");
+    fullview.appendChild(document.createTextNode("Fullview"));
+    fullview.href = window.location.href;
+    fullview.style.cssText = "float: right; clear";
+    navbox.appendChild(fullview);
+ 
     if (params.bookmark) {
         this.link = document.createElement("a");
         this.link.appendChild(document.createTextNode("Link"));
@@ -575,13 +623,9 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
         dojo.connect(this, "onVisibleTracksChanged", function() {
                          brwsr.link.href = params.bookmark(brwsr);
                      });
-        this.link.style.cssText = "float: right; clear";
+        this.link.style.cssText = "float: right; clear; margin-right: 10px";
         navbox.appendChild(this.link);
     }
-
-    //var imgLink = document.createElement("a");
-    
-    //this.link.appendChild(document.createTextNode("DW"));
 
     var moveLeft = document.createElement("input");
     moveLeft.type = "image";
