@@ -62,38 +62,6 @@ var Browser = function(params) {
 	    if( params.show_overview == 0 ) {   
             	overview.style.cssText="display: none";
 	    };
-	   
-	    // building fullview link
-	    //width: 100px; height: 15px; position:fixed z-index: 10;
-	    var fullview_div = document.createElement("div");
-	    fullview_div.className = "fullview";
-	    fullview_div.id = "fullview";
-	    fullview_div.style.cssText="padding: 2px; height: 15px;";
-	    
-	    if( params.show_nav == 0 ) {
-		topPane.appendChild(fullview_div);
-	    };
-
-	    var fullview = document.createElement("a");
-	    fullview.appendChild(document.createTextNode("Fullview"));
-	    fullview.href = window.location.pathname;
-	    fullview.style.cssText = "padding: 0px; float: right; clear";
-	    fullview_div.appendChild(fullview);
-
-	    if (params.bookmark) {
-		this.link = document.createElement("a");
-		this.link.appendChild(document.createTextNode("Link"));
-
-		this.link.href = window.location.href;
-		dojo.connect(this, "onCoarseMove", function() {
-		                 brwsr.link.href = params.bookmark(brwsr);
-		             });
-		dojo.connect(this, "onVisibleTracksChanged", function() {
-		                 brwsr.link.href = params.bookmark(brwsr);
-		             });
-		this.link.style.cssText = "float: right; clear; margin-right: 10px";
-		fullview_div.appendChild(this.link);
-	    }
 
             //try to come up with a good estimate of how big the location box
             //actually has to be
@@ -246,7 +214,6 @@ Browser.prototype.onFineMove = function(startbp, endbp) {
 Browser.prototype.createTrackList = function(parent, params) {
     var leftPane = document.createElement("div");
 
-
     // controls the width of leftPane
     if( params.show_tracklist != 0 ) {   
     	leftPane.style.cssText="width: 10em";
@@ -254,10 +221,9 @@ Browser.prototype.createTrackList = function(parent, params) {
     	leftPane.style.cssText="width: 0em";	
     };
 
-
-//controls track
+    //controls track
     parent.appendChild(leftPane);
-//splitter on left side
+    //splitter on left side
     var leftWidget = new dijit.layout.ContentPane({region: "left", splitter: true}, leftPane);
     var trackListDiv = document.createElement("div");
     trackListDiv.id = "tracksAvail";
@@ -493,6 +459,7 @@ Browser.prototype.navigateTo = function(loc) {
 	});
 };
 
+
 /**
  * load and display the given tracks
  * @example
@@ -520,7 +487,7 @@ Browser.prototype.showTracks = function(trackNameList) {
                 if (trackNames[n] == obj.data.label) {
                     brwsr.viewDndWidget.insertNodes(false, [obj.data]);
                     removeFromList.push(id);
-                }x
+                }
 
             });
     }
@@ -539,7 +506,6 @@ Browser.prototype.showTracks = function(trackNameList) {
  */
 
 Browser.prototype.visibleRegion = function() {
-    //document.write(this);
     return this.view.ref.name + ":" + Math.round(this.view.minVisible()) + ".." + Math.round(this.view.maxVisible());
 };
 
@@ -554,7 +520,31 @@ Browser.prototype.visibleTracks = function() {
     return trackLabels.join(",");
 };
 
+Browser.prototype.bkmrk = function (params, area) {
+    var brwsr = this;
+    if (!this.isInitialized) {
+        this.deferredFunctions.push(function() { brwsr.bkmrk(params, area); });
+	return;
+    }
 
+    if (params.bookmark) {
+        this.link = document.createElement("a");
+	if ((params.show_nav != 0) && (params.show_tracklist != 0) && (params.show_overview != 0)) {
+           this.link.appendChild(document.createTextNode("Link"));
+	} else {
+	   this.link.appendChild(document.createTextNode("Fullview"));
+	};
+        this.link.href = window.location.href;
+        dojo.connect(this, "onCoarseMove", function() {
+                         brwsr.link.href = params.bookmark(brwsr);
+                     });
+        dojo.connect(this, "onVisibleTracksChanged", function() {
+                         brwsr.link.href = params.bookmark(brwsr);
+                     });
+        this.link.style.cssText = "float: right; clear";
+        area.appendChild(this.link);
+    }
+};
 
 /**
  * @private
@@ -590,6 +580,8 @@ Browser.prototype.onCoarseMove = function(startbp, endbp) {
     document.title = this.refSeq.name + ":" + locString;
 };
 
+
+
 /**
  * @private
  */
@@ -597,35 +589,11 @@ Browser.prototype.onCoarseMove = function(startbp, endbp) {
 Browser.prototype.createNavBox = function(parent, locLength, params) {
     var brwsr = this;
     var navbox = document.createElement("div");
-
     var browserRoot = params.browserRoot ? params.browserRoot : "";
     navbox.id = "navbox";
-    //top pane nav box on/off
-    if( params.show_nav != 0 ) {
-        parent.appendChild(navbox);
-    };
+    parent.appendChild(navbox);
     navbox.style.cssText = "text-align: center; padding: 2px; z-index: 10;";
-
-    var fullview = document.createElement("a");
-    fullview.appendChild(document.createTextNode("Fullview"));
-    fullview.href = window.location.href;
-    fullview.style.cssText = "float: right; clear";
-    navbox.appendChild(fullview);
- 
-    if (params.bookmark) {
-        this.link = document.createElement("a");
-        this.link.appendChild(document.createTextNode("Link"));
-
-        this.link.href = window.location.href;
-        dojo.connect(this, "onCoarseMove", function() {
-                         brwsr.link.href = params.bookmark(brwsr);
-                     });
-        dojo.connect(this, "onVisibleTracksChanged", function() {
-                         brwsr.link.href = params.bookmark(brwsr);
-                     });
-        this.link.style.cssText = "float: right; clear; margin-right: 10px";
-        navbox.appendChild(this.link);
-    }
+    brwsr.bkmrk(params, navbox);
 
     var moveLeft = document.createElement("input");
     moveLeft.type = "image";
@@ -640,8 +608,7 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
 		brwsr.view.slide(0.9);
         })
     };
-    navbox.appendChild(moveLeft);
-
+  
     var moveRight = document.createElement("input");
     moveRight.type = "image";
     moveRight.src = browserRoot + "img/slide-right.png";
@@ -654,7 +621,6 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
                      dojo.stopEvent(event);
                      brwsr.view.slide(-0.9);
                  })};
-    navbox.appendChild(moveRight);
 
     navbox.appendChild(document.createTextNode("\u00a0\u00a0\u00a0\u00a0"));
 
@@ -664,7 +630,6 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
     bigZoomOut.id = "bigZoomOut";
     bigZoomOut.className = "icon nav";
     bigZoomOut.style.height = "40px";
-    navbox.appendChild(bigZoomOut);
     if( params.show_nav != 0 ) {   
 	dojo.connect(bigZoomOut, "click",
                  function(event) {
@@ -684,7 +649,6 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
                      dojo.stopEvent(event);
                      brwsr.view.zoomOut();
                  })};
-    navbox.appendChild(zoomOut);
 
     var zoomIn = document.createElement("input");
     zoomIn.type = "image";
@@ -698,7 +662,6 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
                      dojo.stopEvent(event);
                      brwsr.view.zoomIn();
                  })};
-    navbox.appendChild(zoomIn);
 
     var bigZoomIn = document.createElement("input");
     bigZoomIn.type = "image";
@@ -712,12 +675,9 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
                      dojo.stopEvent(event);
                      brwsr.view.zoomIn(undefined, undefined, 2);
                  })};
-    navbox.appendChild(bigZoomIn);
 
-    navbox.appendChild(document.createTextNode("\u00a0\u00a0\u00a0\u00a0"));
     this.chromList = document.createElement("select");
     this.chromList.id="chrom";
-    navbox.appendChild(this.chromList);
     this.locationBox = document.createElement("input");
     this.locationBox.size=locLength;
     this.locationBox.type="text";
@@ -733,7 +693,6 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
                 brwsr.goButton.disabled = false;
             }
         })};
-    navbox.appendChild(this.locationBox);
 
     this.goButton = document.createElement("button");
     this.goButton.appendChild(document.createTextNode("Go"));
@@ -745,7 +704,20 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
             brwsr.goButton.disabled = true;
             dojo.stopEvent(event);
         })};
-    navbox.appendChild(this.goButton);
+
+    if( params.show_nav != 0 ) {
+	    navbox.appendChild(moveLeft);
+	    navbox.appendChild(moveRight);
+	    navbox.appendChild(document.createTextNode("\u00a0\u00a0\u00a0\u00a0"));
+	    navbox.appendChild(bigZoomOut);
+	    navbox.appendChild(zoomOut);
+	    navbox.appendChild(zoomIn);
+	    navbox.appendChild(bigZoomIn);
+	    navbox.appendChild(document.createTextNode("\u00a0\u00a0\u00a0\u00a0"));
+	    navbox.appendChild(this.chromList);
+	    navbox.appendChild(this.locationBox);
+	    navbox.appendChild(this.goButton);
+    };
 
     return navbox;
 };
