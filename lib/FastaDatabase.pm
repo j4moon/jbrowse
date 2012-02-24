@@ -59,18 +59,26 @@ sub from_fasta {
     my $seqdata = {};
 
     for my $filename ( @files ) {
+        my $sep = $/;
+        local *FILE;
+        open FILE, "<$filename" or die "Couldn't open '$filename': $!";
 
-	my $gzip = $filename =~ /\.gz(ip)?$/i ? ':gzip' : '';
-
-        open my $fh, "<$gzip", $filename or die "Couldn't open '$filename': $!";
-
-        local $/ = "\n>";
-        while( my $entry = <$fh> ) {
-	    my ( $name, $seq ) = split "\n", $entry, 2;
-	    ($name) = $name =~ /^\s*>\s*(\S+)/;
+        $/ = ">";
+        my $dummy = <FILE>;
+        my $name;
+        while (($/ = "\n", $name = <FILE>)[1]) {
+            chomp $name;
+            $name =~ s/^\s*(\S+).*$/$1/; # throw away description metadata after name
+            $/ = ">";
+            my $seq = <FILE>;
+            chomp $seq;
+            $/ = $sep;
             $seq =~ s/\s//g;
             $seqdata->{$name} = $seq;
         }
+
+        close FILE;
+        $/ = $sep;
     }
 
     my $self = $class->new ('seqdata' => $seqdata);

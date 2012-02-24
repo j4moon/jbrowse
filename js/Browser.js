@@ -120,6 +120,7 @@ var Browser = function(params) {
                                          + (((newRef.start + newRef.end) * 0.6) | 0));
                         });
 
+
             //hook up GenomeView
             var gv = new GenomeView(viewElem, 250, brwsr.refSeq, 1/200);
             brwsr.view = gv;
@@ -788,8 +789,6 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
 	var select = new dijit.form.FilteringSelect({
 	    id: "dojoBox",
 	    name: "stateSelect",
-	    autoComplete: true,
-	    style: "width: 150px;",
 	    options: [
 		{
 		    value: "",

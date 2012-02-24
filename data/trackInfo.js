@@ -1,0 +1,72 @@
+trackInfo = 
+[
+   {
+      "args" : {
+         "chunkSize" : 20000
+      },
+      "url" : "seq/{refseq}/",
+      "type" : "SequenceTrack",
+      "label" : "DNA",
+      "key" : "DNA"
+   },
+   {
+      "url" : "tracks/{refseq}/ExampleFeatures/trackData.json",
+      "label" : "ExampleFeatures",
+      "type" : "FeatureTrack",
+      "key" : "Example Features"
+   },
+   {
+      "url" : "tracks/{refseq}/NameTest/trackData.json",
+      "type" : "FeatureTrack",
+      "label" : "NameTest",
+      "key" : "Name test track"
+   },
+   {
+      "url" : "tracks/{refseq}/Motifs/trackData.json",
+      "label" : "Motifs",
+      "type" : "FeatureTrack",
+      "key" : "Example motifs"
+   },
+   {
+      "url" : "tracks/{refseq}/Alignments/trackData.json",
+      "type" : "FeatureTrack",
+      "label" : "Alignments",
+      "key" : "Example alignments"
+   },
+   {
+      "url" : "tracks/{refseq}/Genes/trackData.json",
+      "label" : "Genes",
+      "type" : "FeatureTrack",
+      "key" : "Protein-coding genes"
+   },
+   {
+      "url" : "tracks/{refseq}/ReadingFrame/trackData.json",
+      "type" : "FeatureTrack",
+      "label" : "ReadingFrame",
+      "key" : "Frame usage"
+   },
+   {
+      "url" : "tracks/{refseq}/CDS/trackData.json",
+      "label" : "CDS",
+      "type" : "FeatureTrack",
+      "key" : "Predicted genes"
+   },
+   {
+      "url" : "tracks/{refseq}/Transcript/trackData.json",
+      "type" : "FeatureTrack",
+      "label" : "Transcript",
+      "key" : "Exonerate predictions"
+   },
+   {
+      "url" : "tracks/{refseq}/Clones/trackData.json",
+      "label" : "Clones",
+      "type" : "FeatureTrack",
+      "key" : "Fingerprinted BACs"
+   },
+   {
+      "url" : "tracks/{refseq}/EST/trackData.json",
+      "type" : "FeatureTrack",
+      "label" : "EST",
+      "key" : "ESTs"
+   }
+]

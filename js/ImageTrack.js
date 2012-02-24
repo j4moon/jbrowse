@@ -1,3 +1,4 @@
+
 function ImageTrack(trackMeta, url, refSeq, browserParams) {
     Track.call(this, trackMeta.label, trackMeta.key,
                false, browserParams.changeCallback);

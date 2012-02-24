@@ -1,3 +1,4 @@
+
 function Animation(subject, callback, time) {
     //subject: what's being animated
     //callback: function to call at the end of the animation
@@ -153,6 +154,8 @@ function GenomeView(elem, stripeWidth, refseq, zoomLevel) {
     // when the user scrolls
     this.scrollContainer = document.createElement("div");
     this.scrollContainer.id = "container";
+    
+    // changes the location of view plane border space
     this.scrollContainer.style.cssText =
         "position: absolute; left: 0px; top: 0px;";
     elem.appendChild(this.scrollContainer);
@@ -417,7 +420,7 @@ function GenomeView(elem, stripeWidth, refseq, zoomLevel) {
 	view.showVisibleBlocks(true);
 	wheelScrollTimeout = null;
     };
-
+//movement for scroll
     view.wheelScroll = function(e) {
 	var oldY = view.getY();
         // arbitrary 60 pixel vertical movement per scroll wheel event
@@ -485,6 +488,7 @@ function GenomeView(elem, stripeWidth, refseq, zoomLevel) {
 }
 
 /* moves the view by (distance times the width of the view) pixels */
+// <- -> sliding
 GenomeView.prototype.slide = function(distance) {
     if (this.animation) this.animation.stop();
     this.trimVertical();
@@ -1069,6 +1073,7 @@ GenomeView.prototype.trackIterate = function(callback) {
 /* this function must be called whenever tracks in the GenomeView
  * are added, removed, or reordered
  */
+
 GenomeView.prototype.updateTrackList = function() {
     var tracks = [];
     // after a track has been dragged, the DOM is the only place

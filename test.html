@@ -1,0 +1,68 @@
+<head>
+<title>App1</title>
+
+<link rel="stylesheet"
+	type="text/css"
+	href="jslib/dijit/themes/tundra/tundra.css"/>
+
+<script type="text/javascript"
+	djConfig="parseOnLoad: true"
+	src="jslib/dojo/dojo.js">
+</script>
+
+<script type="text/javascript">
+	dojo.require("dijit.form.Select");
+</script>
+</head>
+
+<body class="tundra">
+    <div id="stateSelect"></div>
+ 
+    <script>
+        dojo.require("dijit.form.Select");
+ 
+        dojo.ready(function(){
+            var select = new dijit.form.Select({
+                name: "stateSelect",
+                options: [
+                    {
+                        value: "",
+                        label: "Select a state",
+                        selected: true
+                    },
+                    {
+                        value: "AL",
+                        label: "Alabama"
+                    },
+                    {
+                        value: "AK",
+                        label: "Alaska"
+                    },
+                    {
+                        value: "AZ",
+                        label: "Arizona"
+                    },
+                    {
+                        value: "AR",
+                        label: "Arkansas"
+                    },
+                    // ... more states would go here ...
+                    {
+                        value: "DC",
+                        label: "Washington, D.C.",
+                        disabled: true // can't pick this; it's not a state!
+                    },
+                    {
+                        value: "WY",
+                        label: "Wyoming"
+                    }
+                ]
+            }, "stateSelect");
+            select.startup();
+        });
+    </script>
+</body>
+
+</html>
+
+
