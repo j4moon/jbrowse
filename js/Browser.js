@@ -256,6 +256,7 @@ Browser.prototype.createTrackList = function(parent, params) {
 
     dojo.addOnLoad(function() {
 	var select = new dijit.form.FilteringSelect({
+	    id: "dojoBox",
 	    name: "stateSelect",
 	    options: [
 		{
@@ -268,9 +269,9 @@ Browser.prototype.createTrackList = function(parent, params) {
 		    label: "Alabama"
 		}
 	    ]
-	}, trackListDiv);
-	select.startup();
-	trackListDiv.appendChild(select);
+	}, dom.byID("dojoBox"));
+//	select.startup();
+	trackListDiv.appendChild(dojoBox);
     });
 
     leftPane.appendChild(trackListDiv);
@@ -782,6 +783,30 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
 	});
     this.nom = new dijit.form.Select();
     */
+
+   dojo.addOnLoad(function() {
+	var select = new dijit.form.FilteringSelect({
+	    id: "dojoBox",
+	    name: "stateSelect",
+	    autoComplete: true,
+	    style: "width: 150px;",
+	    options: [
+		{
+		    value: "",
+		    label: "Select a state",
+		    selected: true
+		},
+		{
+		    value: "AL",
+		    label: "Alabama"
+		}
+	    ]
+	}, "dojoBox");
+//	select.startup();
+	navbox.appendChild(dojoBox);
+    });
+
+
     return navbox;
 };
 
