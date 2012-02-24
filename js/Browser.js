@@ -27,6 +27,11 @@ var Browser = function(params) {
     dojo.require("dojo.dnd.move");
     dojo.require("dijit.layout.ContentPane");
     dojo.require("dijit.layout.BorderContainer");
+//FilteringSelect test
+    dojo.require("dijit.form.FilteringSelect");
+//    dojo.require("dijit.form.Select");
+//    dojo.require("dojo.data.ItemFileReadStore");
+//    dojo.require("dojo.store.Memory");
 
     var refSeqs = params.refSeqs;
     var trackData = params.trackData;
@@ -234,6 +239,40 @@ Browser.prototype.createTrackList = function(parent, params) {
         "Available Tracks:<br/>(Drag <img src=\""
         + (params.browserRoot ? params.browserRoot : "")
         + "img/right_arrow.png\"/> to view)<br/><br/>";
+
+//testing 
+    var Button = document.createElement("button");
+    Button.appendChild(document.createTextNode("tracks"));
+    Button.onclick = function(){ alert(params.trackData[0].key); };
+    trackListDiv.appendChild(Button);
+
+//testing Select
+    var left_extraPane = document.createElement("div");
+    leftPane.appendChild(left_extraPane);
+
+    var extraButton = document.createElement("button");
+    extraButton.appendChild(document.createTextNode("extraList"));
+    left_extraPane.appendChild(extraButton);
+
+    dojo.addOnLoad(function() {
+	var select = new dijit.form.FilteringSelect({
+	    name: "stateSelect",
+	    options: [
+		{
+		    value: "",
+		    label: "Select a state",
+		    selected: true
+		},
+		{
+		    value: "AL",
+		    label: "Alabama"
+		}
+	    ]
+	}, trackListDiv);
+	select.startup();
+	trackListDiv.appendChild(select);
+    });
+
     leftPane.appendChild(trackListDiv);
 
     var brwsr = this;
@@ -719,6 +758,30 @@ Browser.prototype.createNavBox = function(parent, locLength, params) {
 	    navbox.appendChild(this.goButton);
     };
 
+    var autoButton = document.createElement("button");
+    autoButton.appendChild(document.createTextNode("ChrmList"));
+    autoButton.onclick = function(){ alert(refSeqs[0].name); };
+    navbox.appendChild(autoButton);
+/*
+    dojo.addOnLoad(function(){
+	    var stateStore = refSeqs;
+	    var select = new dijit.form.Select({
+		name: "stateSelect",
+		searchAttr: "name",		
+		options: [
+		   {
+		      "length" : 50001,
+		      "name" : "ctgA",
+		      "seqDir" : "seq/ctgA",
+		      "seqChunkSize" : 20000,
+		      "end" : 50001,
+		      "start" : 0
+		   }
+		]}, "stateSelect");
+	    	select.startup();
+	});
+    this.nom = new dijit.form.Select();
+    */
     return navbox;
 };
 
